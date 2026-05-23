@@ -7,7 +7,8 @@ async function create(data) {
     `INSERT INTO notifications
       (user_id, channel, title, body, status, metadata)
      VALUES
-      (:user_id, :channel, :title, :body, :status, :metadata)`,
+      (:user_id, :channel, :title, :body, :status, :metadata)
+     RETURNING id`,
     {
       user_id: data.user_id,
       channel: data.channel || 'in_app',

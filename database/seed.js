@@ -24,7 +24,7 @@ async function main() {
            password_hash = :passwordHash,
            role = 'super_admin',
            status = 'active',
-           verified = 1
+           verified = TRUE
        WHERE id = :id`,
       { id: existing[0].id, name, passwordHash }
     );
@@ -32,7 +32,7 @@ async function main() {
   } else {
     await query(
       `INSERT INTO users (name, email, password_hash, role, status, verified)
-       VALUES (:name, :email, :passwordHash, 'super_admin', 'active', 1)`,
+       VALUES (:name, :email, :passwordHash, 'super_admin', 'active', TRUE)`,
       { name, email, passwordHash }
     );
     console.log(`Created super admin: ${email}`);

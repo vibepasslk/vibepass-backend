@@ -44,7 +44,8 @@ async function createOrder(connection, data) {
        payment_reference, buyer_details)
      VALUES
       (:user_id, :event_id, :payment_status, :total, :platform_fee, :gateway_fee, :organizer_amount,
-       :payment_reference, :buyer_details)`,
+       :payment_reference, :buyer_details)
+     RETURNING id`,
     {
       user_id: data.user_id,
       event_id: data.event_id,
@@ -65,7 +66,8 @@ async function createOrderItem(connection, data) {
     `INSERT INTO order_items
       (order_id, ticket_type_id, quantity, unit_price, subtotal, form_answers, seats)
      VALUES
-      (:order_id, :ticket_type_id, :quantity, :unit_price, :subtotal, :form_answers, :seats)`,
+      (:order_id, :ticket_type_id, :quantity, :unit_price, :subtotal, :form_answers, :seats)
+     RETURNING id`,
     {
       order_id: data.order_id,
       ticket_type_id: data.ticket_type_id,
@@ -84,7 +86,8 @@ async function createQrTicket(connection, data) {
     `INSERT INTO qr_tickets
       (order_id, order_item_id, event_id, user_id, qr_code, scan_status)
      VALUES
-      (:order_id, :order_item_id, :event_id, :user_id, :qr_code, 'unscanned')`,
+      (:order_id, :order_item_id, :event_id, :user_id, :qr_code, 'unscanned')
+     RETURNING id`,
     data
   );
   return result.insertId;

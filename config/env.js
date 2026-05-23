@@ -24,6 +24,7 @@ function listEnv(name, fallback) {
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProduction = nodeEnv === 'production';
 const appUrl = process.env.APP_URL || (isProduction ? 'https://api.vibepass.lk' : 'http://localhost:5000');
+const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:5432/vibepass';
 const frontendUrls = listEnv(
   'FRONTEND_URL',
   isProduction
@@ -44,14 +45,13 @@ const env = {
     max: numberEnv('RATE_LIMIT_MAX', isProduction ? 200 : 300)
   },
   db: {
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: numberEnv('DB_PORT', 3306),
-    name: process.env.DB_NAME || 'vibepass',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
+    databaseUrl,
     connectionLimit: numberEnv('DB_CONNECTION_LIMIT', 10),
-    ssl: booleanEnv('DB_SSL', false),
-    sslRejectUnauthorized: booleanEnv('DB_SSL_REJECT_UNAUTHORIZED', true)
+    ssl: booleanEnv(
+      'DB_SSL',
+      isProduction || databaseUrl.includes('supabase.co') || databaseUrl.includes('railway.app')
+    ),
+    sslRejectUnauthorized: booleanEnv('DB_SSL_REJECT_UNAUTHORIZED', false)
   },
   jwt: {
     secret: process.env.JWT_SECRET || 'development-only-change-me',
@@ -77,10 +77,7 @@ function validateProductionEnv(config) {
   if (config.nodeEnv !== 'production') return;
 
   const required = [
-    ['DB_HOST', process.env.DB_HOST],
-    ['DB_NAME', process.env.DB_NAME],
-    ['DB_USER', process.env.DB_USER],
-    ['DB_PASSWORD', process.env.DB_PASSWORD],
+    ['DATABASE_URL', process.env.DATABASE_URL],
     ['JWT_SECRET', process.env.JWT_SECRET],
     ['FRONTEND_URL', process.env.FRONTEND_URL]
   ];

@@ -15,7 +15,9 @@ async function set(key, value, type = 'string') {
   await query(
     `INSERT INTO settings (setting_key, setting_value, value_type)
      VALUES (:key, :value, :type)
-     ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), value_type = VALUES(value_type)`,
+     ON CONFLICT (setting_key) DO UPDATE
+     SET setting_value = EXCLUDED.setting_value,
+         value_type = EXCLUDED.value_type`,
     { key, value: String(value), type }
   );
   return get(key);

@@ -7,7 +7,8 @@ const { created } = require('../utils/respond');
 const create = asyncHandler(async (req, res) => {
   const result = await query(
     `INSERT INTO support_tickets (user_id, email, subject, message)
-     VALUES (:user_id, :email, :subject, :message)`,
+     VALUES (:user_id, :email, :subject, :message)
+     RETURNING id`,
     {
       user_id: req.user ? req.user.id : null,
       email: req.body.email || (req.user ? req.user.email : null),

@@ -9,7 +9,8 @@ async function create(data) {
        seats_per_ticket, ticket_image, qr_mode)
      VALUES
       (:event_id, :category, :price, :early_bird_price, :early_bird_until, :quantity_total,
-       :seats_per_ticket, :ticket_image, :qr_mode)`,
+       :seats_per_ticket, :ticket_image, :qr_mode)
+     RETURNING id`,
     {
       event_id: data.event_id,
       category: data.category,

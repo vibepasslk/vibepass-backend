@@ -7,7 +7,8 @@ async function create(data) {
     `INSERT INTO withdrawals
       (organizer_id, amount, status, bank_account_id, organizer_note)
      VALUES
-      (:organizer_id, :amount, 'pending', :bank_account_id, :organizer_note)`,
+      (:organizer_id, :amount, 'pending', :bank_account_id, :organizer_note)
+     RETURNING id`,
     {
       organizer_id: data.organizer_id,
       amount: data.amount,

@@ -1,2 +1,3 @@
-SOURCE schema.sql;
-SOURCE seed.sql;
+-- Run these files with psql or the Supabase SQL editor in this order:
+--   1. backend/database/schema.sql
+--   2. backend/database/seed.sql

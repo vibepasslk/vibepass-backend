@@ -9,7 +9,8 @@ async function create(data) {
        share_link, rsvp_enabled, status)
      VALUES
       (:creator_id, :event_id, :template_id, :title, :guest_name, :event_date, :venue, :message,
-       :share_link, :rsvp_enabled, :status)`,
+       :share_link, :rsvp_enabled, :status)
+     RETURNING id`,
     {
       creator_id: data.creator_id,
       event_id: data.event_id || null,
@@ -20,7 +21,7 @@ async function create(data) {
       venue: data.venue || null,
       message: data.message || null,
       share_link: data.share_link,
-      rsvp_enabled: data.rsvp_enabled === false ? 0 : 1,
+      rsvp_enabled: data.rsvp_enabled !== false,
       status: data.status || 'published'
     }
   );
@@ -63,7 +64,8 @@ async function createRsvp(data) {
     `INSERT INTO invitation_rsvps
       (invitation_id, guest_name, guest_email, guest_phone, status, note)
      VALUES
-      (:invitation_id, :guest_name, :guest_email, :guest_phone, :status, :note)`,
+      (:invitation_id, :guest_name, :guest_email, :guest_phone, :status, :note)
+     RETURNING id`,
     {
       invitation_id: data.invitation_id,
       guest_name: data.guest_name,

@@ -9,7 +9,8 @@ async function create(data) {
        seating_enabled, visibility, rules, event_terms, status, cover_image, platform_terms_accepted)
      VALUES
       (:organizer_id, :slug, :title, :description, :category, :venue, :map_location, :start_date, :end_date,
-       :seating_enabled, :visibility, :rules, :event_terms, :status, :cover_image, :platform_terms_accepted)`,
+       :seating_enabled, :visibility, :rules, :event_terms, :status, :cover_image, :platform_terms_accepted)
+     RETURNING id`,
     {
       organizer_id: data.organizer_id,
       slug: data.slug,
@@ -20,13 +21,13 @@ async function create(data) {
       map_location: data.map_location || null,
       start_date: data.start_date || null,
       end_date: data.end_date || null,
-      seating_enabled: data.seating_enabled ? 1 : 0,
+      seating_enabled: Boolean(data.seating_enabled),
       visibility: data.visibility || 'public',
       rules: data.rules || null,
       event_terms: data.event_terms || null,
       status: data.status || 'draft',
       cover_image: data.cover_image || null,
-      platform_terms_accepted: data.platform_terms_accepted ? 1 : 0
+      platform_terms_accepted: Boolean(data.platform_terms_accepted)
     }
   );
   return findById(result.insertId);
@@ -67,7 +68,7 @@ async function listPublished({ category, q, limit, offset }) {
     params.category = category;
   }
   if (q) {
-    filters.push('(e.title LIKE :q OR e.venue LIKE :q OR e.description LIKE :q)');
+    filters.push('(e.title ILIKE :q OR e.venue ILIKE :q OR e.description ILIKE :q)');
     params.q = `%${q}%`;
   }
 
@@ -80,7 +81,7 @@ async function listPublished({ category, q, limit, offset }) {
      JOIN users u ON u.id = e.organizer_id
      LEFT JOIN ticket_types tt ON tt.event_id = e.id
      WHERE ${filters.join(' AND ')}
-     GROUP BY e.id
+     GROUP BY e.id, u.name
      ORDER BY e.start_date ASC
      LIMIT :limit OFFSET :offset`,
     params
@@ -145,7 +146,7 @@ async function update(id, data) {
       map_location: data.map_location || null,
       start_date: data.start_date || null,
       end_date: data.end_date || null,
-      seating_enabled: typeof data.seating_enabled === 'boolean' ? Number(data.seating_enabled) : null,
+      seating_enabled: typeof data.seating_enabled === 'boolean' ? data.seating_enabled : null,
       visibility: data.visibility || null,
       rules: data.rules || null,
       event_terms: data.event_terms || null,

@@ -1,6 +1,6 @@
 # VibePass.lk Backend
 
-Node.js, Express, MySQL, and JWT REST API for VibePass.lk.
+Node.js, Express, Supabase PostgreSQL, and JWT REST API for VibePass.lk.
 
 ## Local Setup
 
@@ -13,9 +13,18 @@ npm start
 
 The API listens on `PORT` and exposes routes under `/api`.
 
-## Render
+## Database
 
-Use the included `render.yaml`, or configure manually:
+Set `DATABASE_URL` to the Supabase PostgreSQL connection string. Apply:
+
+```text
+database/schema.sql
+database/seed.sql
+```
+
+## Railway
+
+Use the included `railway.toml`, or configure manually:
 
 ```text
 Build command: npm install
@@ -23,4 +32,4 @@ Start command: npm start
 Health check path: /health
 ```
 
-Add the environment variables from `.env.example` in Render before deploying.
+Add the environment variables from `.env.example` in Railway before deploying.

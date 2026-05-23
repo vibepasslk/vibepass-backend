@@ -7,7 +7,8 @@ async function createProfile(data) {
     `INSERT INTO organizer_profiles
       (user_id, organizer_type, organization_name, status, plan_id, commission_rate)
      VALUES
-      (:user_id, :organizer_type, :organization_name, :status, :plan_id, :commission_rate)`,
+      (:user_id, :organizer_type, :organization_name, :status, :plan_id, :commission_rate)
+     RETURNING id`,
     {
       user_id: data.user_id,
       organizer_type: data.organizer_type || 'Event organizer',
@@ -45,7 +46,7 @@ async function updateProfile(userId, data) {
       organizer_type: data.organizer_type || null,
       organization_name: data.organization_name || null,
       nic_document_path: data.nic_document_path || null,
-      bank_verified: typeof data.bank_verified === 'boolean' ? Number(data.bank_verified) : null
+      bank_verified: typeof data.bank_verified === 'boolean' ? data.bank_verified : null
     }
   );
   return findByUserId(userId);
@@ -91,7 +92,7 @@ async function review(userId, data) {
 
 async function upsertBankAccount(userId, data) {
   const existing = await query(
-    'SELECT id FROM organizer_bank_accounts WHERE user_id = :userId AND is_primary = 1 LIMIT 1',
+    'SELECT id FROM organizer_bank_accounts WHERE user_id = :userId AND is_primary = TRUE LIMIT 1',
     { userId }
   );
 
@@ -116,7 +117,7 @@ async function upsertBankAccount(userId, data) {
       `INSERT INTO organizer_bank_accounts
         (user_id, bank_name, branch_name, account_name, account_number, is_primary)
        VALUES
-        (:userId, :bank_name, :branch_name, :account_name, :account_number, 1)`,
+        (:userId, :bank_name, :branch_name, :account_name, :account_number, TRUE)`,
       {
         userId,
         bank_name: data.bank_name,

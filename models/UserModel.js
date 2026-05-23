@@ -7,7 +7,8 @@ async function create(data) {
     `INSERT INTO users
       (name, email, password_hash, phone, role, status, verified)
      VALUES
-      (:name, :email, :password_hash, :phone, :role, :status, :verified)`,
+      (:name, :email, :password_hash, :phone, :role, :status, :verified)
+     RETURNING id`,
     {
       name: data.name,
       email: data.email,
@@ -15,7 +16,7 @@ async function create(data) {
       phone: data.phone || null,
       role: data.role || 'customer',
       status: data.status || 'active',
-      verified: data.verified ? 1 : 0
+      verified: Boolean(data.verified)
     }
   );
   return findById(result.insertId);

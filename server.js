@@ -9,9 +9,9 @@ async function start() {
 
   try {
     await testConnection();
-    console.log('MySQL connection ready');
+    console.log('PostgreSQL connection ready');
   } catch (error) {
-    console.warn('MySQL connection failed:', error.message);
+    console.warn('PostgreSQL connection failed:', error.message);
     console.warn('Server will still start so static pages and health checks can run.');
   }
 
