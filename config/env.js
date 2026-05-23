@@ -87,7 +87,8 @@ function validateProductionEnv(config) {
     .map(([name]) => name);
 
   if (missing.length) {
-    throw new Error(`Missing required production environment variables: ${missing.join(', ')}`);
+    console.error("Missing env vars:", missing);
+    process.exit(1);
   }
 
   if (config.jwt.secret === 'development-only-change-me' || config.jwt.secret.length < 32) {
