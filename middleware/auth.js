@@ -23,6 +23,9 @@ async function requireAuth(req, _res, next) {
     const payload = jwt.verify(token, env.jwt.secret);
     const user = await UserModel.findById(payload.sub);
     if (!user || user.deleted_at) throw new ApiError(401, 'Invalid session');
+    if (!UserModel.VALID_ROLES.includes(user.role)) {
+      throw new ApiError(403, 'Account role is invalid');
+    }
     if (['suspended', 'banned'].includes(user.status)) {
       throw new ApiError(403, 'Account access is restricted');
     }

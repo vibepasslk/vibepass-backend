@@ -11,6 +11,10 @@ const { env } = require('./config/env');
 const routes = require('./routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
+function healthHandler(_req, res) {
+  res.json({ ok: true, service: 'vibepass-api' });
+}
+
 function corsOrigin(origin, callback) {
   if (!origin) return callback(null, true);
   if (env.frontendUrls.includes('*') || env.frontendUrls.includes(origin)) {
@@ -50,7 +54,8 @@ function createApp() {
   }
 
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-  app.get('/health', (_req, res) => res.json({ ok: true, service: 'vibepass-api' }));
+  app.get('/health', healthHandler);
+  app.get('/api/health', healthHandler);
   app.use('/api', routes);
 
   if (env.frontendPath) {

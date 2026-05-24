@@ -23,8 +23,8 @@ function listEnv(name, fallback) {
 
 const nodeEnv = process.env.NODE_ENV || 'development';
 const isProduction = nodeEnv === 'production';
-const appUrl = process.env.APP_URL || (isProduction ? 'https://api.vibepass.lk' : 'http://localhost:5000');
-const databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@127.0.0.1:5432/vibepass';
+const appUrl = process.env.APP_URL || process.env.API_URL || (isProduction ? '' : 'http://localhost:5000');
+const databaseUrl = process.env.DATABASE_URL || process.env.DB_URL || '';
 const frontendUrls = listEnv(
   'FRONTEND_URL',
   isProduction
@@ -39,7 +39,7 @@ const env = {
   frontendUrl: frontendUrls.join(','),
   frontendUrls,
   primaryFrontendUrl: frontendUrls[0],
-  frontendPath: process.env.FRONTEND_PATH ?? (isProduction ? '' : '..'),
+  frontendPath: process.env.FRONTEND_PATH ?? (isProduction ? '' : '../frontend'),
   rateLimit: {
     windowMs: numberEnv('RATE_LIMIT_WINDOW_MS', 15 * 60 * 1000),
     max: numberEnv('RATE_LIMIT_MAX', isProduction ? 200 : 300)
@@ -77,7 +77,8 @@ function validateProductionEnv(config) {
   if (config.nodeEnv !== 'production') return;
 
   const required = [
-    ['DATABASE_URL', process.env.DATABASE_URL],
+    ['DATABASE_URL or DB_URL', databaseUrl],
+    ['APP_URL or API_URL', appUrl],
     ['JWT_SECRET', process.env.JWT_SECRET],
     ['FRONTEND_URL', process.env.FRONTEND_URL]
   ];

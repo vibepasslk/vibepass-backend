@@ -10,6 +10,9 @@ const { getPagination } = require('../utils/pagination');
 
 const users = asyncHandler(async (req, res) => {
   const pagination = getPagination(req.query);
+  if (req.query.role && !UserModel.VALID_ROLES.includes(req.query.role)) {
+    throw new ApiError(400, 'Invalid user role filter');
+  }
   const rows = await UserModel.list({ role: req.query.role, status: req.query.status, ...pagination });
   ok(res, { users: rows, pagination });
 });

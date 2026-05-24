@@ -2,7 +2,18 @@
 
 const { query } = require('../config/database');
 
+const VALID_ROLES = ['super_admin', 'organizer', 'customer', 'staff'];
+
+function validateRole(role) {
+  const nextRole = role || 'customer';
+  if (!VALID_ROLES.includes(nextRole)) {
+    throw new Error(`Invalid user role: ${nextRole}`);
+  }
+  return nextRole;
+}
+
 async function create(data) {
+  const role = validateRole(data.role);
   const result = await query(
     `INSERT INTO users
       (name, email, password_hash, phone, role, status, verified)
@@ -14,7 +25,7 @@ async function create(data) {
       email: data.email,
       password_hash: data.password_hash,
       phone: data.phone || null,
-      role: data.role || 'customer',
+      role,
       status: data.status || 'active',
       verified: Boolean(data.verified)
     }
@@ -91,6 +102,8 @@ async function countByRole() {
 
 module.exports = {
   create,
+  VALID_ROLES,
+  validateRole,
   findByEmail,
   findById,
   list,

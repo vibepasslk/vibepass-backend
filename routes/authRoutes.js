@@ -7,8 +7,9 @@ const { validateBody, authSchemas } = require('../middleware/validate');
 
 const router = express.Router();
 
-router.post('/register', validateBody(authSchemas.register), authController.register);
 router.post('/login', validateBody(authSchemas.login), authController.login);
+router.post('/signup', validateBody(authSchemas.register), authController.register);
+router.post('/register', validateBody(authSchemas.register), authController.register);
 router.get('/me', requireAuth, authController.me);
 router.post('/forgot-password', validateBody(authSchemas.forgotPassword), authController.forgotPassword);
 router.post('/2fa/verify', validateBody(authSchemas.verify2fa), authController.verify2fa);
