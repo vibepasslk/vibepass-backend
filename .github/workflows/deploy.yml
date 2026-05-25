@@ -1,9 +1,10 @@
-name: build-test
+name: VibePass Frontend CI/CD
 
 on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
