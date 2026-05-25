@@ -1,28 +1,31 @@
-name: VibePass Backend CI/CD
+name: build-test
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  backend:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
+          cache: npm
 
-      - name: Install backend dependencies
-        working-directory: backend
+      - name: Install dependencies
         run: npm install
 
-      - name: Backend check
-        working-directory: backend
-        run: npm run check || echo "skip check"
-
-      - name: Trigger Render deploy
-        run: curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_BACKEND }}
+      - name: Build project
+        run: npm run build
+        env:
+          VITE_API_URL: https://api.vibepass.lk/api
