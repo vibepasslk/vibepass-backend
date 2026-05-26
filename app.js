@@ -12,92 +12,118 @@ const routes = require('./routes');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 function healthHandler(_req, res) {
-  res.json({ ok: true, service: 'vibepass-api' });
+  res.json({
+    ok: true,
+    service: 'vibepass-api',
+    time: new Date().toISOString()
+  });
 }
 
 function createApp() {
   const app = express();
 
-  // Important for Render / proxies
+  // Trust Render / proxies
   app.set('trust proxy', 1);
 
-  // Security headers
-  app.use(helmet({
-    contentSecurityPolicy: false
-  }));
+  // =========================
+  // SECURITY HEADERS
+  // =========================
+  app.use(
+    helmet({
+      contentSecurityPolicy: false
+    })
+  );
 
   // =========================
-  // CORS FIX (IMPORTANT)
+  // CORS CONFIG (FIXED)
   // =========================
-  const allowedOrigins = (env.frontendUrls || []).map(o => o.trim());
+  const allowedOrigins = [
+    'https://vibepass.lk',
+    'https://www.vibepass.lk'
+  ];
 
-  app.use(cors({
+  const corsOptions = {
     origin: function (origin, callback) {
-      // allow Postman / mobile apps
+      // Allow server-to-server or mobile apps
       if (!origin) return callback(null, true);
 
-      // allow all (dev mode)
-      if (allowedOrigins.includes('*')) {
+      if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
         return callback(null, true);
       }
 
-      // allow listed origins
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      // ❌ DO NOT throw error (prevents CORS crash)
+      console.log('❌ CORS blocked origin:', origin);
       return callback(null, false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
-  }));
+  };
 
-  // IMPORTANT: handle preflight requests
-  app.options('*', cors());
+  // IMPORTANT: apply BEFORE routes
+  app.use(cors(corsOptions));
 
-  // =========================
-  // Rate Limiting
-  // =========================
-  app.use(rateLimit({
-    windowMs: env.rateLimit.windowMs,
-    max: env.rateLimit.max,
-    standardHeaders: true,
-    legacyHeaders: false
-  }));
+  // IMPORTANT: preflight must use SAME config
+  app.options('*', cors(corsOptions));
 
   // =========================
-  // Body Parsers
+  // RATE LIMITING
+  // =========================
+  app.use(
+    rateLimit({
+      windowMs: env.rateLimit.windowMs || 15 * 60 * 1000,
+      max: env.rateLimit.max || 200,
+      standardHeaders: true,
+      legacyHeaders: false
+    })
+  );
+
+  // =========================
+  // BODY PARSERS
   // =========================
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-  // Logging
+  // =========================
+  // LOGGING
+  // =========================
   if (env.nodeEnv !== 'test') {
-    app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
-  }
-
-  // Static files
-  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-  // Health checks
-  app.get('/health', healthHandler);
-  app.get('/api/health', healthHandler);
-
-  // API routes
-  app.use('/api', routes);
-
-  // Frontend static (optional)
-  if (env.frontendPath) {
-    const frontendPath = path.resolve(__dirname, env.frontendPath);
-    app.use(express.static(frontendPath));
-    app.get('/', (_req, res) =>
-      res.sendFile(path.join(frontendPath, 'index.html'))
+    app.use(
+      morgan(env.nodeEnv === 'production' ? 'combined' : 'dev')
     );
   }
 
-  // Error handlers
+  // =========================
+  // STATIC FILES
+  // =========================
+  app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+  // =========================
+  // HEALTH CHECKS
+  // =========================
+  app.get('/health', healthHandler);
+  app.get('/api/health', healthHandler);
+
+  // =========================
+  // API ROUTES
+  // =========================
+  app.use('/api', routes);
+
+  // =========================
+  // FRONTEND STATIC (OPTIONAL)
+  // =========================
+  if (env.frontendPath) {
+    const frontendPath = path.resolve(__dirname, env.frontendPath);
+
+    app.use(express.static(frontendPath));
+
+    app.get('/', (_req, res) => {
+      res.sendFile(path.join(frontendPath, 'index.html'));
+    });
+  }
+
+  // =========================
+  // ERROR HANDLING (MUST BE LAST)
+  // =========================
   app.use(notFound);
   app.use(errorHandler);
 
