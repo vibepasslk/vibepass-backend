@@ -37,10 +37,11 @@ function createApp() {
   // =========================
   // CORS CONFIG (FIXED)
   // =========================
-  const allowedOrigins = [
-    'https://vibepass.lk',
-    'https://www.vibepass.lk'
-  ];
+const allowedOrigins = [
+  'https://vibepass.lk',
+  'https://www.vibepass.lk',
+  'https://frontend-frontend-pj8p5p1y5-vibepass.vercel.app'
+];
 
   const corsOptions = {
     origin: function (origin, callback) {
