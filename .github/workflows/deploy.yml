@@ -1,4 +1,4 @@
-name: VibePass Frontend CI/CD
+name: VibePass Backend CI/CD
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,7 +26,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        run: npm run build
+      - name: Run checks
+        run: npm run check
+
+      - name: Deploy to Render
         env:
-          VITE_API_URL: https://api.vibepass.lk/api
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          curl -X POST $RENDER_DEPLOY_HOOK
